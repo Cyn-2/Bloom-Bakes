@@ -37,16 +37,45 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Navbar background change on scroll
+// Combined scroll handler with throttling
+let scrollTimeout;
 window.addEventListener('scroll', () => {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 100) {
-        navbar.style.background = 'linear-gradient(135deg, rgba(255, 107, 157, 0.95), rgba(196, 69, 105, 0.95))';
-        navbar.style.backdropFilter = 'blur(10px)';
-    } else {
-        navbar.style.background = 'linear-gradient(135deg, var(--primary-color), var(--accent-color))';
-        navbar.style.backdropFilter = 'none';
-    }
+    if (scrollTimeout) return;
+    
+    scrollTimeout = setTimeout(() => {
+        const navbar = document.querySelector('.navbar');
+        const scrollY = window.scrollY;
+        
+        // Navbar background change
+        if (scrollY > 100) {
+            navbar.style.background = 'linear-gradient(135deg, rgba(255, 107, 157, 0.95), rgba(196, 69, 105, 0.95))';
+            navbar.style.backdropFilter = 'blur(10px)';
+        } else {
+            navbar.style.background = 'linear-gradient(135deg, var(--primary-color), var(--accent-color))';
+            navbar.style.backdropFilter = 'none';
+        }
+        
+        // Active navigation state
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (scrollY >= sectionTop - 100) {
+                current = section.getAttribute('id');
+            }
+        });
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active-link');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active-link');
+            }
+        });
+        
+        scrollTimeout = null;
+    }, 50);
 });
 
 // Intersection Observer for fade-in animations
@@ -139,43 +168,8 @@ function showMessage(text, type) {
     }, 5000);
 }
 
-// Add active state to navigation based on scroll position
-window.addEventListener('scroll', () => {
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    let current = '';
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-        if (pageYOffset >= sectionTop - 100) {
-            current = section.getAttribute('id');
-        }
-    });
-    
-    navLinks.forEach(link => {
-        link.classList.remove('active-link');
-        if (link.getAttribute('href') === `#${current}`) {
-            link.classList.add('active-link');
-        }
-    });
-});
 
-// Add parallax effect to hero section
-window.addEventListener('scroll', () => {
-    const hero = document.querySelector('.hero');
-    if (hero) {
-        const scrolled = window.pageYOffset;
-        hero.style.transform = `translateY(${scrolled * 0.5}px)`;
-    }
-});
 
-// Product card hover effect enhancement
-const productCards = document.querySelectorAll('.product-card');
-productCards.forEach(card => {
-    card.addEventListener('mouseenter', function() {
-        this.style.transition = 'all 0.3s ease';
-    });
-});
+
 
 console.log('🌸 Bloom Bakes website loaded successfully!');
